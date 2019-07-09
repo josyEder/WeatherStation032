@@ -13,88 +13,41 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "TAG";
     private static final int REQUEST_SIGNUP = 0;
     private static final int REQUEST_RESET = 0;
 
-    Button _loginButton = (Button) findViewById(R.id.btnLogin);
-    EditText _userEmail = findViewById(R.id.input_email);
-    EditText _password = (EditText) findViewById(R.id.input_password);
-    TextView _pwdForgottenLink = findViewById((R.id.link_forgetPWD));
-    TextView _signUpLink = findViewById((R.id.link_forgetPWD));
+
+    Button _loginButton = null;
+    EditText _userEmail = null;
+    EditText _password = null;
+    TextView _pwdForgottenLink = null;
+    TextView _signUpLink = null;
+    String URL = "i weiss ned was i für a url da reinschreibn muss";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-
-        _signUpLink.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // Start the Signup activity
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivityForResult(intent, REQUEST_SIGNUP);
-            }
-        });
-
-        _pwdForgottenLink.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // Start the Password Reset  activity
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivityForResult(intent, REQUEST_RESET);
-            }
-        });
-    }
-
-    public void Login() {
-        Log.d(TAG, "Login");
-
-        if (!validUser()) {
-            onLoginFailed();
-            return;
-        }
-
-        _loginButton.setEnabled(false);
-
-        final ProgressDialog progressDialog = new ProgressDialog(MainActivity.this,
-                R.style.Theme_AppCompat_DayNight);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
-
-        String email = _userEmail.getText().toString();
-        String password = _password.getText().toString();
-
-        // TODO: Implement your own authentication logic here.
-
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_SIGNUP) {
-            if (resultCode == RESULT_OK) {
-
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
-                this.finish();
-            }
-        }
+        _loginButton = findViewById(R.id.btnLogin);
+        _userEmail = findViewById(R.id.input_email);
+        _password = (EditText) findViewById(R.id.input_password);
+        _pwdForgottenLink = findViewById((R.id.link_forgetPWD));
+        _signUpLink = findViewById((R.id.link_forgetPWD));
     }
 
     @Override
@@ -104,13 +57,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onLoginSuccess() {
+        Toast.makeText(getBaseContext(), "Login succesfull", Toast.LENGTH_LONG).show();
         _loginButton.setEnabled(true);
-        finish();
     }
 
     public void onLoginFailed() {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
-
         _loginButton.setEnabled(true);
     }
 
@@ -141,4 +93,47 @@ public class MainActivity extends AppCompatActivity {
 
         return valid;
     }
+
+    public void signUpLinkWasClicked(View view) {
+        startActivity(new Intent(MainActivity.this, SignupActivity.class));
+    }
+
+    public void forgtePWDLinkWasClicked(View view) {
+        // Start the Password Reset  activity
+        Log.d(TAG, "link forget pwd clicked");
+        Intent i = new Intent(this, ResetPasswordActivity.class);
+        startActivity(i);
+    }
+
+    public void Login(View view) {
+        StringRequest request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                if (s.equals("true")) {
+                    Toast.makeText(MainActivity.this, "Login Successful", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(MainActivity.this, MeasurementsActivity.class));
+                } else {
+                    Toast.makeText(MainActivity.this, "Incorrect Details", Toast.LENGTH_LONG).show();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(MainActivity.this, "Some error occurred -> " + volleyError, Toast.LENGTH_LONG).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<String, String>();
+                parameters.put("email", _userEmail.getText().toString());
+                parameters.put("password", _password.getText().toString());
+                return parameters;
+            }
+        };
+
+        RequestQueue rQueue = Volley.newRequestQueue(MainActivity.this);
+        rQueue.add(request);
+    }
+
+
 }

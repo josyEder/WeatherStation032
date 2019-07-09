@@ -3,6 +3,7 @@ package com.example.weatherstation03;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,17 +16,24 @@ public class SignupActivity extends AppCompatActivity {
 
     private static final String TAG = "SignupActivity";
 
-    Button _signupButton = (Button) findViewById(R.id.btn_signup);
-    EditText _userName = findViewById(R.id.input_name);
-    EditText _userEmail = findViewById(R.id.input_email);
-    EditText _password =(EditText)findViewById(R.id.input_password);
-    TextView _pwdForgottenLink = findViewById((R.id.link_forgetPWD));
-    TextView _loginLink = findViewById((R.id.link_forgetPWD));
+    Button _signupButton = null;
+    EditText _userName = null;
+    EditText _userEmail = null;
+    EditText _password =null;
+    TextView _pwdForgottenLink = null;
+    TextView _loginLink = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+         _signupButton = (Button) findViewById(R.id.btn_signup);
+         _userName = findViewById(R.id.input_name);
+         _userEmail = findViewById(R.id.input_email);
+         _password =(EditText)findViewById(R.id.input_password);
+         _pwdForgottenLink = findViewById((R.id.link_forgetPWD));
+         _loginLink = findViewById((R.id.link_forgetPWD));
 
         _signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -34,13 +42,6 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
-        _loginLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Finish the registration screen and return to the Login activity
-                finish();
-            }
-        });
     }
 
     public void signup() {
@@ -119,5 +120,10 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         return valid;
+    }
+
+    public void alreadyRegisteredWasClicked(View view) {
+        Intent i = new Intent(this, MainActivity.class);
+        startActivity(i);
     }
 }
